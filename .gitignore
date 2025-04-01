@@ -1,0 +1,45 @@
+# Archivos de Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.VC.opendb
+
+# Compilados y binarios
+*.obj
+*.exe
+*.dll
+*.lib
+*.pdb
+*.ilk
+*.exp
+*.ncb
+*.idb
+*.ipch
+*.tlog
+*.log
+*.lastbuildstate
+*.aps
+
+# Archivos de compilación de CUDA
+*.cubin
+*.ptx
+*.o
+*.linkinfo
+*.fatbin
+
+# Directorios generados por la compilación
+Debug/
+Release/
+x64/
+x86/
+ipch/
+out/
+build/
+
+# Otros archivos de sistema
+*.cache
+*.temp
+*.log
