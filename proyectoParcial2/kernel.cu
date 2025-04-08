@@ -82,6 +82,79 @@ __global__ void regla1(Agent* agentes, curandState* states) {
         }
     }
 }
+__global__ void regla2(Agent* agentes, curandState* states) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N) return;
+
+    float move_decision = curand_uniform(&states[i]);
+
+    if (move_decision <= agentes[i].P_mov) {
+       
+        float type_decision = curand_uniform(&states[i]);
+        if (type_decision <= agentes[i].P_smo) {
+           
+            float dx = (curand_uniform(&states[i]) * 2.0f - 1.0f) * l_Max;
+            float dy = (curand_uniform(&states[i]) * 2.0f - 1.0f) * l_Max;
+
+            agentes[i].x += dx;
+            agentes[i].y += dy;
+
+            agentes[i].x = fminf(fmaxf(agentes[i].x, 0.0f), p);
+            agentes[i].y = fminf(fmaxf(agentes[i].y, 0.0f), q);
+        }
+        else {
+            agentes[i].x = curand_uniform(&states[i]) * p;
+            agentes[i].y = curand_uniform(&states[i]) * q;
+        }
+    }
+}
+__global__ void regla3(Agent* agentes, curandState* states) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N) return; 
+
+    if (agentes[i].S == 0) {
+        float rand_ext = curand_uniform(&states[i]);
+        if (rand_ext <= agentes[i].P_ext) {
+            agentes[i].S = 1;
+        }
+    }
+}
+
+__global__ void regla4(Agent* agentes) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N) return;  
+
+    if (agentes[i].S == 1) {
+        if (agentes[i].T_inc > 0) {
+            agentes[i].T_inc--; 
+            if (agentes[i].T_inc == 0) {
+                agentes[i].S = -1;
+            }
+        }
+    }
+    else if (agentes[i].S == -1) {
+        if (agentes[i].T_rec > 0) {
+            agentes[i].T_rec--;  
+            if (agentes[i].T_rec == 0) {
+                agentes[i].S = 2; 
+            }
+        }
+    }
+}
+
+__global__ void regla5(Agent* agentes, curandState* states) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N) return; 
+
+    if (agentes[i].S == -1) {
+        float rand_val = curand_uniform(&states[i]);
+        if (rand_val <= agentes[i].P_fat) {
+            agentes[i].S = -2;
+        }
+    }
+}
+
+
 
 
 void simularCPU(Agent* agentes) {
@@ -106,7 +179,7 @@ int main() {
     Agent* agentesGPU;
     curandState* estadosGPU;
     cudaMalloc(&agentesGPU, N * sizeof(Agent));
-    cudaMalloc(&estadosGPU, N * sizeof(curandState)));
+    cudaMalloc(&estadosGPU, N * sizeof(curandState));
 
     // Configurar kernels
     dim3 bloques((N + 255) / 256);
