@@ -108,6 +108,52 @@ __global__ void regla2(Agent* agentes, curandState* states) {
         }
     }
 }
+__global__ void regla3(Agent* agentes, curandState* states) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N) return; 
+
+    if (agentes[i].S == 0) {
+        float rand_ext = curand_uniform(&states[i]);
+        if (rand_ext <= agentes[i].P_ext) {
+            agentes[i].S = 1;
+        }
+    }
+}
+
+__global__ void regla4(Agent* agentes) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N) return;  
+
+    if (agentes[i].S == 1) {
+        if (agentes[i].T_inc > 0) {
+            agentes[i].T_inc--; 
+            if (agentes[i].T_inc == 0) {
+                agentes[i].S = -1;
+            }
+        }
+    }
+    else if (agentes[i].S == -1) {
+        if (agentes[i].T_rec > 0) {
+            agentes[i].T_rec--;  
+            if (agentes[i].T_rec == 0) {
+                agentes[i].S = 2; 
+            }
+        }
+    }
+}
+
+__global__ void regla5(Agent* agentes, curandState* states) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N) return; 
+
+    if (agentes[i].S == -1) {
+        float rand_val = curand_uniform(&states[i]);
+        if (rand_val <= agentes[i].P_fat) {
+            agentes[i].S = -2;
+        }
+    }
+}
+
 
 
 
